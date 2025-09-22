@@ -3,7 +3,7 @@ set(TOOLCHAIN_PREFIX "x86_64-w64-mingw32")
 set(CMAKE_SYSTEM_NAME Windows)
 
 #posix for std::this_thread, might work with just g++
-set(CMAKE_CXX_COMPILER "${TOOLCHAIN_PREFIX}-g++-posix")
+set(CMAKE_CXX_COMPILER "${TOOLCHAIN_PREFIX}-g++")
 set(CMAKE_C_COMPILER "${TOOLCHAIN_PREFIX}-gcc")
 set(CMAKE_OBJCOPY "${TOOLCHAIN_PREFIX}-objcopy")
 set(CMAKE_STRIP "${TOOLCHAIN_PREFIX}-strip")
@@ -12,6 +12,14 @@ set(CMAKE_AR "${TOOLCHAIN_PREFIX}-ar")
 set(ASSEMBLER "${TOOLCHAIN_PREFIX}-as")
 set(CMAKE_RC_COMPILER "${TOOLCHAIN_PREFIX}-windres")
 
+# Paths SDL2
+SET(SDL2_PATH "/home/diego/SDL2-win64")
+SET(SDL2_INCLUDE_DIR "${SDL2_PATH}/include/SDL2")
+SET(SDL2_LIBRARY "${SDL2_PATH}/lib/libSDL2.a")
+
+SET(SDL2_MIXER_PATH "/home/diego/SDL2_mixer-win64")
+SET(SDL2_MIXER_INCLUDE_DIR "${SDL2_MIXER_PATH}/include/SDL2")
+SET(SDL2_MIXER_LIBRARY "${SDL2_MIXER_PATH}/lib/libSDL2_mixer.a")
 
 set(CMAKE_FIND_ROOT_PATH /usr/${TOOLCHAIN_PREFIX})
 
