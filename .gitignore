@@ -312,3 +312,18 @@ PARAM.SFO
 # Downloaded archives / temp files
 *.tar.gz
 *.deb
+*.zip
+*.html
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# CMake
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
