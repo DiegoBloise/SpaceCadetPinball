@@ -12,8 +12,9 @@ int fullscrn::screen_mode;
 int fullscrn::display_changed;
 
 int fullscrn::resolution = 0;
-const resolution_info fullscrn::resolution_array[3] =
+const resolution_info fullscrn::resolution_array[4] =
 {
+	{480, 272, 450, 236, 504},
 	{640, 480, 600, 416, 501},
 	{800, 600, 752, 520, 502},
 	{1024, 768, 960, 666, 503},
@@ -97,13 +98,13 @@ void fullscrn::SetResolution(int value)
 {
 	if (!pb::FullTiltMode || pb::FullTiltDemoMode)
 		value = 0;
-	assertm(value >= 0 && value <= 2, "Resolution value out of bounds");
+	assertm(value >= 0 && value <= 3, "Resolution value out of bounds");
 	resolution = value;
 }
 
 int fullscrn::GetMaxResolution()
 {
-	return pb::FullTiltMode && !pb::FullTiltDemoMode ? 2 : 0;
+	return pb::FullTiltMode && !pb::FullTiltDemoMode ? 3 : 0;
 }
 
 void fullscrn::window_size_changed()
