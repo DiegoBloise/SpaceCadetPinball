@@ -92,6 +92,7 @@ int winmain::WinMain(LPCSTR lpCmdLine)
 	pspDebugScreenInit();
 	pspDebugScreenSetXY(0, 0);
 	pspDebugScreenPrintf("SpaceCadetPinball PSP v%s\n", Version);
+	pspDebugScreenPrintf("By github.com/DiegoBloise\n");
 	pspDebugScreenPrintf("Initializing SDL2...\n");
 	sceDisplayWaitVblankStart();
 
@@ -274,25 +275,9 @@ void winmain::MainLoop()
 	auto frameStart = Clock::now();
 	double UpdateToFrameCounter = 0;
 	DurationMs sleepRemainder(0), frameDuration(TargetFrameTime);
-	auto prevTime = frameStart;
 
 	while (true)
 	{
-		if (DispFrameRate)
-		{
-			auto curTime = Clock::now();
-			if (curTime - prevTime > DurationMs(1000))
-			{
-				char buf[60];
-				auto elapsedSec = DurationMs(curTime - prevTime).count() * 0.001;
-				snprintf(buf, sizeof buf, "UPS=%02.02f FPS=%02.02f",
-				         updateCounter / elapsedSec, frameCounter / elapsedSec);
-				FpsDetails = buf;
-				frameCounter = updateCounter = 0;
-				prevTime = curTime;
-			}
-		}
-
 		// PSP controller input
 		{
 			SceCtrlData pad;
@@ -338,6 +323,16 @@ void winmain::MainLoop()
 			if (released & PSP_CTRL_UP)
 				pb::InputUp({InputTypes::GameController, SDL_CONTROLLER_BUTTON_DPAD_UP});
 
+			// Triangle: Toggle music
+			if (pressed & PSP_CTRL_TRIANGLE)
+			{
+				options::Options.Music = !options::Options.Music;
+				if (!options::Options.Music)
+					midi::music_stop();
+				else
+					midi::music_play();
+			}
+
 			// Start: Pause
 			if (pressed & PSP_CTRL_START)
 				pause();
@@ -367,7 +362,6 @@ void winmain::MainLoop()
 
 			if (UpdateToFrameCounter >= UpdateToFrameRatio)
 			{
-				SDL_RenderClear(Renderer);
 				render::PresentVScreen();
 				SDL_RenderPresent(Renderer);
 				frameCounter++;

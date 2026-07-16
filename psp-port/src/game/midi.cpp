@@ -153,6 +153,20 @@ Mix_Music* midi::load_track_sub(std::string fileName, bool isMidi)
 				audio = Mix_LoadMUS_RW(rw, 1);
 				break;
 			}
+
+			// PSP fallback: try PINBALL.WAV if MIDI failed
+			if (!audio && fileName.find("PINBALL.MID") != std::string::npos)
+			{
+				auto wavPath = pb::make_path_name("PINBALL.WAV");
+				auto wavHandle = fopenu(wavPath.c_str(), "rb");
+				if (wavHandle)
+				{
+					fclose(wavHandle);
+					auto rw = SDL_RWFromFile(wavPath.c_str(), "rb");
+					audio = Mix_LoadMUS_RW(rw, 1);
+					break;
+				}
+			}
 		}
 		else
 		{

@@ -99,7 +99,7 @@ class options
 public:
 	// Original does ~120 updates per second.
 	static constexpr int MaxUps = 360, MaxFps = MaxUps, MinUps = 60, MinFps = MinUps,
-	                     DefUps = 120, DefFps = 60;
+	                     DefUps = 60, DefFps = 30;
 	// Original uses 8 sound channels
 	static constexpr int MaxSoundChannels = 32, MinSoundChannels = 1, DefSoundChannels = 8;
 	static constexpr int MaxVolume = MIX_MAX_VOLUME, MinVolume = 0, DefVolume = MaxVolume;
