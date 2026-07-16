@@ -306,6 +306,7 @@ build.ninja
 *.elf
 *.prx
 *.PBP
+*.DAT
 PARAM.SFO
 *.SFO
 
