@@ -302,41 +302,41 @@ void winmain::MainLoop()
 			unsigned int pressed = pad.Buttons & ~prevButtons;
 			unsigned int released = ~pad.Buttons & prevButtons;
 
-			// Left Flipper: L-trigger
+			// Left Flipper: L-trigger → LEFTSHOULDER (9)
 			if (pressed & PSP_CTRL_LTRIGGER)
-				pb::InputDown({InputTypes::GameController, 0});
+				pb::InputDown({InputTypes::GameController, SDL_CONTROLLER_BUTTON_LEFTSHOULDER});
 			if (released & PSP_CTRL_LTRIGGER)
-				pb::InputUp({InputTypes::GameController, 0});
+				pb::InputUp({InputTypes::GameController, SDL_CONTROLLER_BUTTON_LEFTSHOULDER});
 
-			// Right Flipper: R-trigger
+			// Right Flipper: R-trigger → RIGHTSHOULDER (10)
 			if (pressed & PSP_CTRL_RTRIGGER)
-				pb::InputDown({InputTypes::GameController, 1});
+				pb::InputDown({InputTypes::GameController, SDL_CONTROLLER_BUTTON_RIGHTSHOULDER});
 			if (released & PSP_CTRL_RTRIGGER)
-				pb::InputUp({InputTypes::GameController, 1});
+				pb::InputUp({InputTypes::GameController, SDL_CONTROLLER_BUTTON_RIGHTSHOULDER});
 
-			// Plunger: X button
+			// Plunger/Launch: X button → A (0)
 			if (pressed & PSP_CTRL_CROSS)
-				pb::InputDown({InputTypes::GameController, 4});
+				pb::InputDown({InputTypes::GameController, SDL_CONTROLLER_BUTTON_A});
 			if (released & PSP_CTRL_CROSS)
-				pb::InputUp({InputTypes::GameController, 4});
+				pb::InputUp({InputTypes::GameController, SDL_CONTROLLER_BUTTON_A});
 
-			// Left Bump: D-pad Left
+			// Left Table Bump (Tilt Left): D-pad Left → DPAD_LEFT (13)
 			if (pressed & PSP_CTRL_LEFT)
-				pb::InputDown({InputTypes::GameController, 11});
+				pb::InputDown({InputTypes::GameController, SDL_CONTROLLER_BUTTON_DPAD_LEFT});
 			if (released & PSP_CTRL_LEFT)
-				pb::InputUp({InputTypes::GameController, 11});
+				pb::InputUp({InputTypes::GameController, SDL_CONTROLLER_BUTTON_DPAD_LEFT});
 
-			// Right Bump: D-pad Right
+			// Right Table Bump (Tilt Right): D-pad Right → DPAD_RIGHT (14)
 			if (pressed & PSP_CTRL_RIGHT)
-				pb::InputDown({InputTypes::GameController, 12});
+				pb::InputDown({InputTypes::GameController, SDL_CONTROLLER_BUTTON_DPAD_RIGHT});
 			if (released & PSP_CTRL_RIGHT)
-				pb::InputUp({InputTypes::GameController, 12});
+				pb::InputUp({InputTypes::GameController, SDL_CONTROLLER_BUTTON_DPAD_RIGHT});
 
-			// Bottom Bump: D-pad Up
+			// Bottom Table Bump (Tilt Up): D-pad Up → DPAD_UP (11)
 			if (pressed & PSP_CTRL_UP)
-				pb::InputDown({InputTypes::GameController, 13});
+				pb::InputDown({InputTypes::GameController, SDL_CONTROLLER_BUTTON_DPAD_UP});
 			if (released & PSP_CTRL_UP)
-				pb::InputUp({InputTypes::GameController, 13});
+				pb::InputUp({InputTypes::GameController, SDL_CONTROLLER_BUTTON_DPAD_UP});
 
 			// Start: Pause
 			if (pressed & PSP_CTRL_START)
