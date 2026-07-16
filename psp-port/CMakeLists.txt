@@ -14,6 +14,8 @@ file(GLOB_RECURSE GAME_SOURCE_FILES
 list(APPEND GAME_SOURCE_FILES
     ${CMAKE_CURRENT_LIST_DIR}/src/psp_input.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/psp_input.h
+    ${CMAKE_CURRENT_LIST_DIR}/src/psp_ge.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/src/psp_ge.h
 )
 
 add_executable(${PROJECT_NAME} ${GAME_SOURCE_FILES})
@@ -43,6 +45,8 @@ target_link_libraries(${PROJECT_NAME}
     pspdebug
     pspdisplay
     pspge
+    pspgu
+    pspgum
     pspctrl
     psputility
     pspaudio

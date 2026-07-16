@@ -128,7 +128,11 @@ void gdrv_bitmap8::CreateTexture(const char* scaleHint, int access)
 	if (Texture != nullptr)
 	{
 		SDL_DestroyTexture(Texture);
+		Texture = nullptr;
 	}
+
+	if (!winmain::Renderer)
+		return;
 
 	UsingSdlHint hint{ SDL_HINT_RENDER_SCALE_QUALITY, scaleHint };
 	Texture = SDL_CreateTexture
@@ -143,6 +147,8 @@ void gdrv_bitmap8::CreateTexture(const char* scaleHint, int access)
 
 void gdrv_bitmap8::BlitToTexture()
 {
+	if (!Texture)
+		return;
 	assertm(Texture, "Updating null texture");
 	int pitch = 0;
 	ColorRgba* lockedPixels;
@@ -297,6 +303,8 @@ void gdrv::ApplyPalette(gdrv_bitmap8& bmp)
 void gdrv::CreatePreview(gdrv_bitmap8& bmp)
 {
 	if (bmp.Texture)
+		return;
+	if (!winmain::Renderer)
 		return;
 
 	bmp.CreateTexture("nearest", SDL_TEXTUREACCESS_STATIC);

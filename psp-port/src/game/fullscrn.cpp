@@ -6,6 +6,7 @@
 #include "pb.h"
 #include "render.h"
 #include "winmain.h"
+#include "psp_ge.h"
 
 
 int fullscrn::screen_mode;
@@ -109,8 +110,8 @@ int fullscrn::GetMaxResolution()
 
 void fullscrn::window_size_changed()
 {
-	int width, height;
-	SDL_GetRendererOutputSize(winmain::Renderer, &width, &height);
+	int width = psp_ge::getScreenWidth();
+	int height = psp_ge::getScreenHeight();
 	int menuHeight = options::Options.ShowMenu ? winmain::MainMenuHeight : 0;
 	height -= menuHeight;
 	auto res = &resolution_array[resolution];

@@ -16,6 +16,7 @@
 #include <pspdisplay.h>
 #include <pspctrl.h>
 #include "psp_input.h"
+#include "psp_ge.h"
 
 PSP_MODULE_INFO("SpaceCadetPinball", 0, 1, 0);
 PSP_MAIN_THREAD_ATTR(PSP_THREAD_ATTR_USER);
@@ -129,22 +130,8 @@ int winmain::WinMain(LPCSTR lpCmdLine)
 	}
 	pspDebugScreenPrintf("Window created OK\n");
 
-	// Software renderer for PSP
-	SDL_Renderer* renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_SOFTWARE);
-	Renderer = renderer;
-	if (!renderer)
-	{
-		pspDebugScreenPrintf("SDL_CreateRenderer FAILED: %s\n", SDL_GetError());
-		sceDisplayWaitVblankStart();
-		SDL_Delay(5000);
-		return 1;
-	}
-	SDL_RendererInfo rendererInfo{};
-	if (!SDL_GetRendererInfo(renderer, &rendererInfo))
-		printf("Using SDL renderer: %s\n", rendererInfo.name);
-	SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
-	SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "nearest");
-	pspDebugScreenPrintf("Renderer created OK\n");
+	Renderer = nullptr;
+	pspDebugScreenPrintf("Using PSP GE hardware renderer\n");
 
 	auto prefPath = SDL_GetPrefPath("", "SpaceCadetPinball");
 	auto basePath = SDL_GetBasePath();
@@ -235,6 +222,8 @@ int winmain::WinMain(LPCSTR lpCmdLine)
 		pspDebugScreenPrintf("Starting game...\n");
 		sceDisplayWaitVblankStart();
 
+		psp_ge::init(480, 272);
+
 		SDL_ShowWindow(window);
 		fullscrn::set_screen_mode(Options.FullScreen);
 
@@ -261,7 +250,7 @@ int winmain::WinMain(LPCSTR lpCmdLine)
 
 	SDL_free(basePath);
 	SDL_free(prefPath);
-	SDL_DestroyRenderer(renderer);
+	psp_ge::shutdown();
 	SDL_DestroyWindow(window);
 	SDL_Quit();
 
@@ -363,7 +352,6 @@ void winmain::MainLoop()
 			if (UpdateToFrameCounter >= UpdateToFrameRatio)
 			{
 				render::PresentVScreen();
-				SDL_RenderPresent(Renderer);
 				frameCounter++;
 				UpdateToFrameCounter -= UpdateToFrameRatio;
 			}

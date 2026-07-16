@@ -2,6 +2,7 @@
 #include "render.h"
 
 #include "fullscrn.h"
+#include "psp_ge.h"
 #include "GroupData.h"
 #include "options.h"
 #include "pb.h"
@@ -137,7 +138,7 @@ void render::uninit()
 
 void render::recreate_screen_texture()
 {
-	vscreen->CreateTexture(options::Options.LinearFiltering ? "linear" : "nearest", SDL_TEXTUREACCESS_STREAMING);
+	psp_ge::setLinearFilter(options::Options.LinearFiltering);
 }
 
 void render::update()
@@ -364,68 +365,33 @@ void render::SpriteViewer(bool* /*show*/)
 
 void render::PresentVScreen()
 {
-	vscreen->BlitToTexture();
+	psp_ge::beginFrame();
 
 	if (offset_x == 0 && offset_y == 0)
 	{
-		SDL_RenderCopy(winmain::Renderer, vscreen->Texture, nullptr, &DestinationRect);
+		psp_ge::drawQuad(vscreen,
+			0, 0, vscreen->Width, vscreen->Height,
+			DestinationRect.x, DestinationRect.y,
+			DestinationRect.w, DestinationRect.h);
 	}
 	else
 	{
 		auto tableWidthCoef = static_cast<float>(pb::MainTable->Width) / vscreen->Width;
 		auto srcSeparationX = static_cast<int>(round(vscreen->Width * tableWidthCoef));
-		auto srcBoardRect = SDL_Rect
-		{
-			0, 0,
-			srcSeparationX, vscreen->Height
-		};
-		auto srcSidebarRect = SDL_Rect
-		{
-			srcSeparationX, 0,
-			vscreen->Width - srcSeparationX, vscreen->Height
-		};
-
-#if SDL_VERSION_ATLEAST(2, 0, 10)
-		// SDL_RenderCopyF was added in 2.0.10
-		auto dstSeparationX = DestinationRect.w * tableWidthCoef;
-		auto dstBoardRect = SDL_FRect
-		{
-			DestinationRect.x + offset_x * fullscrn::ScaleX,
-			DestinationRect.y + offset_y * fullscrn::ScaleY,
-			dstSeparationX, static_cast<float>(DestinationRect.h)
-		};
-		auto dstSidebarRect = SDL_FRect
-		{
-			DestinationRect.x + dstSeparationX, static_cast<float>(DestinationRect.y),
-			DestinationRect.w - dstSeparationX, static_cast<float>(DestinationRect.h)
-		};
-
-		SDL_RenderCopyF(winmain::Renderer, vscreen->Texture, &srcBoardRect, &dstBoardRect);
-		SDL_RenderCopyF(winmain::Renderer, vscreen->Texture, &srcSidebarRect, &dstSidebarRect);
-#else
-		// SDL_RenderCopy cannot express sub pixel offset.
-		// Vscreen shift is required for that.
 		auto dstSeparationX = static_cast<int>(DestinationRect.w * tableWidthCoef);
 		auto scaledOffX = static_cast<int>(round(offset_x * fullscrn::ScaleX));
-		if (offset_x != 0 && scaledOffX == 0)
-			scaledOffX = Sign(offset_x);
 		auto scaledOffY = static_cast<int>(round(offset_y * fullscrn::ScaleY));
-		if (offset_y != 0 && scaledOffX == 0)
-			scaledOffY = Sign(offset_y);
 
-		auto dstBoardRect = SDL_Rect
-		{
+		psp_ge::drawQuad(vscreen,
+			0, 0, srcSeparationX, vscreen->Height,
 			DestinationRect.x + scaledOffX, DestinationRect.y + scaledOffY,
-			dstSeparationX, DestinationRect.h
-		};
-		auto dstSidebarRect = SDL_Rect
-		{
-			DestinationRect.x + dstSeparationX, DestinationRect.y,
-			DestinationRect.w - dstSeparationX, DestinationRect.h
-		};
+			dstSeparationX, DestinationRect.h);
 
-		SDL_RenderCopy(winmain::Renderer, vscreen->Texture, &srcBoardRect, &dstBoardRect);
-		SDL_RenderCopy(winmain::Renderer, vscreen->Texture, &srcSidebarRect, &dstSidebarRect);
-#endif
+		psp_ge::drawQuad(vscreen,
+			srcSeparationX, 0, vscreen->Width - srcSeparationX, vscreen->Height,
+			DestinationRect.x + dstSeparationX, DestinationRect.y,
+			DestinationRect.w - dstSeparationX, DestinationRect.h);
 	}
+
+	psp_ge::endFrame();
 }

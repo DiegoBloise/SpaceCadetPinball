@@ -109,6 +109,8 @@ void zdrv::CreatePreview(zmap_header_type& zMap)
 {
 	if (zMap.Texture)
 		return;
+	if (!winmain::Renderer)
+		return;
 
 	auto tmpBuff = new ColorRgba[zMap.Width * zMap.Height];
 
