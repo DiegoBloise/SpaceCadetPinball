@@ -55,6 +55,14 @@ winmain::DurationMs winmain::SpinThreshold = DurationMs(0.005);
 WelfordState winmain::SleepState{};
 int winmain::CursorIdleCounter = 0;
 
+static void psp_perror(const char* msg)
+{
+	pspDebugScreenInit();
+	pspDebugScreenPrintf("FATAL ERROR:\n%s\n", msg);
+	sceDisplayWaitVblankStart();
+	SDL_Delay(5000);
+}
+
 static int exit_callback(int arg1, int arg2, void *common) {
     sceKernelExitGame();
     return 0;
@@ -80,23 +88,32 @@ int winmain::WinMain(LPCSTR lpCmdLine)
 
 	std::set_new_handler(memalloc_failure);
 
-	printf("SpaceCadetPinball PSP v%s\n", Version);
+	// Init debug screen first so we can see errors
+	pspDebugScreenInit();
+	pspDebugScreenSetXY(0, 0);
+	pspDebugScreenPrintf("SpaceCadetPinball PSP v%s\n", Version);
+	pspDebugScreenPrintf("Initializing SDL2...\n");
+	sceDisplayWaitVblankStart();
 
 	// SDL init
 	SDL_SetMainReady();
 	if (SDL_Init(SDL_INIT_TIMER | SDL_INIT_AUDIO | SDL_INIT_VIDEO |
 		SDL_INIT_EVENTS | SDL_INIT_JOYSTICK | SDL_INIT_GAMECONTROLLER) < 0)
 	{
-		pb::ShowMessageBox(SDL_MESSAGEBOX_ERROR, "Could not initialize SDL2", SDL_GetError());
+		pspDebugScreenPrintf("SDL_Init FAILED: %s\n", SDL_GetError());
+		sceDisplayWaitVblankStart();
+		SDL_Delay(5000);
 		return 1;
 	}
+	pspDebugScreenPrintf("SDL2 initialized OK\n");
 
 	pb::quickFlag = strstr(lpCmdLine, "-quick") != nullptr;
 
 	// SDL window - PSP 480x272 fullscreen
+	// Use a literal title since data isn't loaded yet
 	SDL_Window* window = SDL_CreateWindow
 	(
-		pb::get_rc_string(Msg::STRING139),
+		"Space Cadet Pinball",
 		SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
 		480, 272,
 		SDL_WINDOW_SHOWN | SDL_WINDOW_FULLSCREEN
@@ -104,16 +121,21 @@ int winmain::WinMain(LPCSTR lpCmdLine)
 	MainWindow = window;
 	if (!window)
 	{
-		pb::ShowMessageBox(SDL_MESSAGEBOX_ERROR, "Could not create window", SDL_GetError());
+		pspDebugScreenPrintf("SDL_CreateWindow FAILED: %s\n", SDL_GetError());
+		sceDisplayWaitVblankStart();
+		SDL_Delay(5000);
 		return 1;
 	}
+	pspDebugScreenPrintf("Window created OK\n");
 
 	// Software renderer for PSP
 	SDL_Renderer* renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_SOFTWARE);
 	Renderer = renderer;
 	if (!renderer)
 	{
-		pb::ShowMessageBox(SDL_MESSAGEBOX_ERROR, "Could not create renderer", SDL_GetError());
+		pspDebugScreenPrintf("SDL_CreateRenderer FAILED: %s\n", SDL_GetError());
+		sceDisplayWaitVblankStart();
+		SDL_Delay(5000);
 		return 1;
 	}
 	SDL_RendererInfo rendererInfo{};
@@ -121,15 +143,19 @@ int winmain::WinMain(LPCSTR lpCmdLine)
 		printf("Using SDL renderer: %s\n", rendererInfo.name);
 	SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
 	SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "nearest");
+	pspDebugScreenPrintf("Renderer created OK\n");
 
 	auto prefPath = SDL_GetPrefPath("", "SpaceCadetPinball");
 	auto basePath = SDL_GetBasePath();
+	pspDebugScreenPrintf("BasePath: %s\n", basePath ? basePath : "null");
+	pspDebugScreenPrintf("PrefPath: %s\n", prefPath ? prefPath : "null");
+	sceDisplayWaitVblankStart();
 
 	// SDL mixer init
 	bool mixOpened = false, noAudio = strstr(lpCmdLine, "-noaudio") != nullptr;
 	if (!noAudio)
 	{
-		if ((Mix_Init(MIX_INIT_MID_Proxy) & MIX_INIT_MID_Proxy) == 0)
+		if ((Mix_Init(MIX_INIT_MID) & MIX_INIT_MID) == 0)
 		{
 			printf("Could not initialize SDL MIDI, music might not work.\nSDL Error: %s\n", SDL_GetError());
 			SDL_ClearError();
@@ -142,6 +168,7 @@ int winmain::WinMain(LPCSTR lpCmdLine)
 		else
 			mixOpened = true;
 	}
+	pspDebugScreenPrintf("Audio: %s\n", mixOpened ? "OK" : "disabled");
 
 	auto resetAllOptions = strstr(lpCmdLine, "-reset") != nullptr;
 	do
@@ -179,25 +206,33 @@ int winmain::WinMain(LPCSTR lpCmdLine)
 		if (!midi::music_init(mixOpened, Options.MusicVolume))
 			Options.Music = false;
 
+		pspDebugScreenPrintf("Loading game data (DAT file)...\n");
+		sceDisplayWaitVblankStart();
+
 		if (pb::init())
 		{
-			std::string message = "The .dat file is missing.\n"
-				"Make sure that the game data is present in any of the following locations:\n";
+			pspDebugScreenPrintf("ERROR: Could not load game data!\n");
+			pspDebugScreenPrintf("Looking for DAT file in:\n");
 			for (auto path : searchPaths)
 			{
 				if (path)
-				{
-					message = message + (path[0] ? path : "working directory") + "\n";
-				}
+					pspDebugScreenPrintf("  - %s\n", path[0] ? path : "(working dir)");
 			}
-			pb::ShowMessageBox(SDL_MESSAGEBOX_ERROR, "Could not load game data", message.c_str());
+			pspDebugScreenPrintf("\nPlace PINBALL.DAT next to EBOOT.PBP\n");
+			sceDisplayWaitVblankStart();
+			SDL_Delay(10000);
 			return 1;
 		}
+		pspDebugScreenPrintf("Game data loaded OK\n");
+		sceDisplayWaitVblankStart();
 
 		fullscrn::init();
 
 		pb::reset_table();
 		pb::firsttime_setup();
+
+		pspDebugScreenPrintf("Starting game...\n");
+		sceDisplayWaitVblankStart();
 
 		SDL_ShowWindow(window);
 		fullscrn::set_screen_mode(Options.FullScreen);
@@ -410,7 +445,7 @@ void winmain::memalloc_failure()
 {
 	midi::music_stop();
 	Sound::Close();
-	pb::ShowMessageBox(SDL_MESSAGEBOX_ERROR, "Fatal", "Out of memory");
+	psp_perror("Out of memory");
 	std::exit(1);
 }
 
