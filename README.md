@@ -2,6 +2,8 @@
 
 PSP port of [SpaceCadetPinball](https://github.com/kktos/SpaceCadetPinball), a reverse engineering of `3D Pinball for Windows - Space Cadet`.
 
+![Screenshot](screenshot.png)
+
 ## Building
 
 ### Prerequisites
