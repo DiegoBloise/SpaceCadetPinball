@@ -10,7 +10,6 @@ struct zmap_header_type
 	int Stride;
 	unsigned Resolution;
 	uint16_t* ZPtr1;
-	SDL_Texture* Texture;
 private:
 	static int pad(int width);
 };
@@ -25,6 +24,5 @@ public:
 	static void paint_flat(int width, int height, gdrv_bitmap8* dstBmp, int dstBmpXOff, int dstBmpYOff,
 	                       zmap_header_type* zMap, int dstZMapXOff, int dstZMapYOff, gdrv_bitmap8* srcBmp,
 	                       int srcBmpXOff, int srcBmpYOff, uint16_t depth);
-	static void CreatePreview(zmap_header_type& zMap);
 	static void FlipZMapHorizontally(const zmap_header_type& zMap);
 };

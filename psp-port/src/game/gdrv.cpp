@@ -5,7 +5,6 @@
 #include "partman.h"
 #include "pb.h"
 #include "score.h"
-#include "winmain.h"
 #include "TTextBox.h"
 #include "fullscrn.h"
 
@@ -28,7 +27,6 @@ gdrv_bitmap8::gdrv_bitmap8(int width, int height, bool indexed, bool bmpBuff)
 	Stride = width;
 	IndexedStride = width;
 	BitmapType = BitmapTypes::DibBitmap;
-	Texture = nullptr;
 	IndexedBmpPtr = nullptr;
 	BmpBufPtr1 = nullptr;
 	XPosition = 0;
@@ -59,7 +57,6 @@ gdrv_bitmap8::gdrv_bitmap8(const dat8BitBmpHeader& header)
 	XPosition = header.XPosition;
 	YPosition = header.YPosition;
 	Resolution = header.Resolution;
-	Texture = nullptr;
 
 	int sizeInBytes;
 	if (BitmapType == BitmapTypes::Spliced)
@@ -86,8 +83,6 @@ gdrv_bitmap8::~gdrv_bitmap8()
 	{
 		delete[] BmpBufPtr1;
 		delete[] IndexedBmpPtr;
-		if (Texture)
-			SDL_DestroyTexture(Texture);
 	}
 }
 
@@ -121,50 +116,6 @@ void gdrv_bitmap8::ScaleIndexed(float scaleX, float scaleY)
 	IndexedBmpPtr = newIndBuf;
 	delete BmpBufPtr1;
 	BmpBufPtr1 = new ColorRgba[Stride * Height];
-}
-
-void gdrv_bitmap8::CreateTexture(const char* scaleHint, int access)
-{
-	if (Texture != nullptr)
-	{
-		SDL_DestroyTexture(Texture);
-		Texture = nullptr;
-	}
-
-	if (!winmain::Renderer)
-		return;
-
-	UsingSdlHint hint{ SDL_HINT_RENDER_SCALE_QUALITY, scaleHint };
-	Texture = SDL_CreateTexture
-	(
-		winmain::Renderer,
-		SDL_PIXELFORMAT_BGRA32,
-		access,
-		Width, Height
-	);
-	SDL_SetTextureBlendMode(Texture, SDL_BLENDMODE_NONE);
-}
-
-void gdrv_bitmap8::BlitToTexture()
-{
-	if (!Texture)
-		return;
-	assertm(Texture, "Updating null texture");
-	int pitch = 0;
-	ColorRgba* lockedPixels;
-	auto result = SDL_LockTexture
-	(
-		Texture,
-		nullptr,
-		reinterpret_cast<void**>(&lockedPixels),
-		&pitch
-	);
-	assertm(result == 0, "Updating non-streaming texture");
-	assertm(static_cast<unsigned>(pitch) == Width * sizeof(ColorRgba), "Padding on vScreen texture");
-
-	std::memcpy(lockedPixels, BmpBufPtr1, Width * Height * sizeof(ColorRgba));
-
-	SDL_UnlockTexture(Texture);
 }
 
 int gdrv::display_palette(ColorRgba* plt)
@@ -276,11 +227,6 @@ void gdrv::ScrollBitmapHorizontal(gdrv_bitmap8* bmp, int xStart)
 	}
 }
 
-
-void gdrv::grtext_draw_ttext_in_box()
-{
-}
-
 void gdrv::ApplyPalette(gdrv_bitmap8& bmp)
 {
 	if (bmp.BitmapType == BitmapTypes::None)
@@ -298,15 +244,4 @@ void gdrv::ApplyPalette(gdrv_bitmap8& bmp)
 			*dst++ = current_palette[*src++];
 		}
 	}
-}
-
-void gdrv::CreatePreview(gdrv_bitmap8& bmp)
-{
-	if (bmp.Texture)
-		return;
-	if (!winmain::Renderer)
-		return;
-
-	bmp.CreateTexture("nearest", SDL_TEXTUREACCESS_STATIC);
-	SDL_UpdateTexture(bmp.Texture, nullptr, bmp.BmpBufPtr1, bmp.Width * 4);
 }
