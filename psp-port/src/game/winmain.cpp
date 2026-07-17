@@ -28,33 +28,21 @@ SDL_Renderer* winmain::Renderer = nullptr;
 
 int winmain::return_value = 0;
 bool winmain::bQuit = false;
-bool winmain::activated = false;
-bool winmain::DispFrameRate = false;
-bool winmain::DispGRhistory = false;
 bool winmain::single_step = false;
 bool winmain::has_focus = true;
-int winmain::last_mouse_x;
-int winmain::last_mouse_y;
-int winmain::mouse_down;
 bool winmain::no_time_loss = false;
 
 bool winmain::restart = false;
 
-std::vector<float> winmain::gfrDisplay{};
-unsigned winmain::gfrOffset = 0;
-float winmain::gfrWindow = 5.0f;
 bool winmain::LaunchBallEnabled = true;
 bool winmain::HighScoresEnabled = true;
 bool winmain::DemoActive = false;
 int winmain::MainMenuHeight = 0;
-std::string winmain::FpsDetails, winmain::PrevSdlError;
-unsigned winmain::PrevSdlErrorCount = 0;
 double winmain::UpdateToFrameRatio;
 winmain::DurationMs winmain::TargetFrameTime;
 optionsStruct& winmain::Options = options::Options;
 winmain::DurationMs winmain::SpinThreshold = DurationMs(0.005);
 WelfordState winmain::SleepState{};
-int winmain::CursorIdleCounter = 0;
 
 static void psp_perror(const char* msg)
 {
@@ -99,8 +87,7 @@ int winmain::WinMain(LPCSTR lpCmdLine)
 
 	// SDL init
 	SDL_SetMainReady();
-	if (SDL_Init(SDL_INIT_TIMER | SDL_INIT_AUDIO | SDL_INIT_VIDEO |
-		SDL_INIT_EVENTS | SDL_INIT_JOYSTICK | SDL_INIT_GAMECONTROLLER) < 0)
+	if (SDL_Init(SDL_INIT_TIMER | SDL_INIT_AUDIO | SDL_INIT_VIDEO) < 0)
 	{
 		pspDebugScreenPrintf("SDL_Init FAILED: %s\n", SDL_GetError());
 		sceDisplayWaitVblankStart();
@@ -148,7 +135,7 @@ int winmain::WinMain(LPCSTR lpCmdLine)
 			printf("Could not initialize SDL MIDI, music might not work.\nSDL Error: %s\n", SDL_GetError());
 			SDL_ClearError();
 		}
-		if (Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 2048) != 0)
+		if (Mix_OpenAudio(22050, MIX_DEFAULT_FORMAT, 2, 1024) != 0)
 		{
 			printf("Could not open audio device, continuing without audio.\nSDL Error: %s\n", SDL_GetError());
 			SDL_ClearError();
@@ -435,12 +422,6 @@ void winmain::end_pause()
 		pb::pause_continue();
 		no_time_loss = true;
 	}
-}
-
-void winmain::new_game()
-{
-	end_pause();
-	pb::replay_level(false);
 }
 
 void winmain::pause(bool toggle)
