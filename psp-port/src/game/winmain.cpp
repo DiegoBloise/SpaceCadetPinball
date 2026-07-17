@@ -130,12 +130,7 @@ int winmain::WinMain(LPCSTR lpCmdLine)
 	bool mixOpened = false, noAudio = strstr(lpCmdLine, "-noaudio") != nullptr;
 	if (!noAudio)
 	{
-		if ((Mix_Init(MIX_INIT_MID) & MIX_INIT_MID) == 0)
-		{
-			printf("Could not initialize SDL MIDI, music might not work.\nSDL Error: %s\n", SDL_GetError());
-			SDL_ClearError();
-		}
-		if (Mix_OpenAudio(22050, MIX_DEFAULT_FORMAT, 2, 1024) != 0)
+		if (Mix_OpenAudio(11025, AUDIO_S16SYS, 1, 512) != 0)
 		{
 			printf("Could not open audio device, continuing without audio.\nSDL Error: %s\n", SDL_GetError());
 			SDL_ClearError();
@@ -229,7 +224,6 @@ int winmain::WinMain(LPCSTR lpCmdLine)
 	{
 		if (mixOpened)
 			Mix_CloseAudio();
-		Mix_Quit();
 	}
 
 	SDL_free(basePath);
