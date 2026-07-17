@@ -92,8 +92,8 @@ int winmain::WinMain(LPCSTR lpCmdLine)
 	// Init debug screen first so we can see errors
 	pspDebugScreenInit();
 	pspDebugScreenSetXY(0, 0);
-	pspDebugScreenPrintf("SpaceCadetPinball PSP v%s\n", Version);
-	pspDebugScreenPrintf("By github.com/DiegoBloise\n");
+	pspDebugScreenPrintf("\nSpaceCadetPinball PSP v%s\n", Version);
+	pspDebugScreenPrintf("By github.com/DiegoBloise\n\n");
 	pspDebugScreenPrintf("Initializing SDL2...\n");
 	sceDisplayWaitVblankStart();
 
@@ -107,7 +107,7 @@ int winmain::WinMain(LPCSTR lpCmdLine)
 		SDL_Delay(5000);
 		return 1;
 	}
-	pspDebugScreenPrintf("SDL2 initialized OK\n");
+	pspDebugScreenPrintf("SDL2 initialized OK\n\n");
 
 	pb::quickFlag = strstr(lpCmdLine, "-quick") != nullptr;
 
@@ -131,12 +131,12 @@ int winmain::WinMain(LPCSTR lpCmdLine)
 	pspDebugScreenPrintf("Window created OK\n");
 
 	Renderer = nullptr;
-	pspDebugScreenPrintf("Using PSP GE hardware renderer\n");
+	pspDebugScreenPrintf("Using PSP GE hardware renderer\n\n");
 
 	auto prefPath = SDL_GetPrefPath("", "SpaceCadetPinball");
 	auto basePath = SDL_GetBasePath();
-	pspDebugScreenPrintf("BasePath: %s\n", basePath ? basePath : "null");
-	pspDebugScreenPrintf("PrefPath: %s\n", prefPath ? prefPath : "null");
+	// pspDebugScreenPrintf("BasePath: %s\n", basePath ? basePath : "null");
+	// pspDebugScreenPrintf("PrefPath: %s\n", prefPath ? prefPath : "null");
 	sceDisplayWaitVblankStart();
 
 	// SDL mixer init
