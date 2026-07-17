@@ -359,10 +359,6 @@ void render::build_occlude_list()
 	delete spriteArr;
 }
 
-void render::SpriteViewer(bool* /*show*/)
-{
-}
-
 void render::PresentVScreen()
 {
 	psp_ge::beginFrame();

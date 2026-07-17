@@ -68,7 +68,6 @@ public:
 	static void frame(float dtMilliSec);
 	static void timed_frame(float timeDelta);
 	static void pause_continue();
-	static void loose_focus();
 	static void InputUp(GameInput input);
 	static void InputDown(GameInput input);
 	static void launch_ball();

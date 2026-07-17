@@ -522,12 +522,6 @@ void pb::pause_continue()
 	}
 }
 
-void pb::loose_focus()
-{
-	if (MainTable)
-		MainTable->Message(MessageCode::LooseFocus, time_now);
-}
-
 void pb::InputUp(GameInput input)
 {
 	if (game_mode != GameModes::InGame || winmain::single_step || demo_mode)

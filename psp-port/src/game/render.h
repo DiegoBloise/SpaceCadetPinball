@@ -51,7 +51,6 @@ public:
 	static void set_background_zmap(zmap_header_type* zMap, int offsetX, int offsetY);
 	static void shift(int offsetX, int offsetY);
 	static void build_occlude_list();
-	static void SpriteViewer(bool* show);
 	static void PresentVScreen();
 private:
 	static std::vector<render_sprite*> sprite_list, ball_list;

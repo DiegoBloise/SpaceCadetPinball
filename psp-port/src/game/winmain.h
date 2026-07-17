@@ -80,26 +80,18 @@ public:
 	[[ noreturn ]] static void memalloc_failure();
 	static int ProcessWindowMessages();
 	static void end_pause();
-	static void new_game();
 	static void pause(bool toggle = true);
 	static void Restart();
 	static void UpdateFrameRate();
 private:
 	static int return_value;
-	static int mouse_down, last_mouse_x, last_mouse_y;
-	static bool no_time_loss, activated, bQuit, has_focus, DispGRhistory, DispFrameRate;
-	static std::vector<float> gfrDisplay;
-	static std::string FpsDetails, PrevSdlError;
+	static bool no_time_loss, bQuit, has_focus;
 	static bool restart;
 	static double UpdateToFrameRatio;
 	static DurationMs TargetFrameTime;
 	static struct optionsStruct& Options;
 	static DurationMs SpinThreshold;
 	static WelfordState SleepState;
-	static unsigned PrevSdlErrorCount;
-	static unsigned gfrOffset;
-	static float gfrWindow;
-	static int CursorIdleCounter;
 
 	static void HybridSleep(DurationMs seconds);
 	static void MainLoop();
