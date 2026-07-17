@@ -224,9 +224,6 @@ int winmain::WinMain(LPCSTR lpCmdLine)
 
 		psp_ge::init(480, 272);
 
-		SDL_ShowWindow(window);
-		fullscrn::set_screen_mode(Options.FullScreen);
-
 		if (strstr(lpCmdLine, "-demo"))
 			pb::toggle_demo();
 		else

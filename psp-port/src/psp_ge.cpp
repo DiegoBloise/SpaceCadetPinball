@@ -30,17 +30,6 @@ void psp_ge::init(int width, int height)
 
 	std::memset(vram, 0, 512 * 512 * 4 * 2);
 
-	sceGuDisplay(GU_FALSE);
-	sceGuInit();
-
-	sceGuStart(GU_DIRECT, nullptr);
-	sceGuDrawBuffer(GU_PSM_8888, backBuf, 512);
-	sceGuDispBuffer(screen_width, screen_height, frontBuf, 512);
-	sceGuDepthBuffer((void*)((unsigned int)vram + 2 * 512 * 512 * 4), 512);
-	sceGuFinish();
-	sceGuSync(0, 0);
-
-	sceGuDisplay(GU_TRUE);
 	sceDisplaySetFrameBuf(frontBuf, 512, GU_PSM_8888, 0);
 
 	initialized = true;
@@ -50,8 +39,6 @@ void psp_ge::shutdown()
 {
 	if (initialized)
 	{
-		sceGuDisplay(GU_FALSE);
-		sceGuTerm();
 		initialized = false;
 	}
 }
