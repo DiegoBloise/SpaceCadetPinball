@@ -45,8 +45,6 @@ target_link_libraries(${PROJECT_NAME}
     pspdebug
     pspdisplay
     pspge
-    pspgu
-    pspgum
     pspctrl
     psputility
     pspaudio

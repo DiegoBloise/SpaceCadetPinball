@@ -2,7 +2,7 @@
 #include "gdrv.h"
 
 #include <pspkernel.h>
-#include <pspgu.h>
+#include <pspge.h>
 #include <pspdisplay.h>
 #include <cstring>
 
@@ -30,7 +30,7 @@ void psp_ge::init(int width, int height)
 
 	std::memset(vram, 0, 512 * 512 * 4 * 2);
 
-	sceDisplaySetFrameBuf(frontBuf, 512, GU_PSM_8888, 0);
+	sceDisplaySetFrameBuf(frontBuf, 512, PSP_DISPLAY_PIXEL_FORMAT_8888, 0);
 
 	initialized = true;
 }
@@ -45,53 +45,64 @@ void psp_ge::shutdown()
 
 void psp_ge::beginFrame()
 {
-	unsigned char* buf = static_cast<unsigned char*>(backBuf);
-	for (int y = 0; y < screen_height; y++)
-		std::memset(buf + y * 512 * 4, 0, screen_width * 4);
 }
 
 void psp_ge::drawQuad(gdrv_bitmap8* bmp, int srcX, int srcY, int srcW, int srcH,
                        int dstX, int dstY, int dstW, int dstH)
 {
-	if (!bmp || !bmp->BmpBufPtr1)
+	if (!bmp || !bmp->BmpBufPtr1 || dstW <= 0 || dstH <= 0)
 		return;
+
+	const int bmpW = bmp->Width;
+	const int bmpH = bmp->Height;
+
+	// Clip destination to screen bounds
+	int clipLeft = 0, clipTop = 0;
+	if (dstX < 0) clipLeft = -dstX;
+	if (dstY < 0) clipTop = -dstY;
+	int clipRight = dstW, clipBottom = dstH;
+	if (dstX + dstW > screen_width) clipRight = screen_width - dstX;
+	if (dstY + dstH > screen_height) clipBottom = screen_height - dstY;
+
+	if (clipLeft >= clipRight || clipTop >= clipBottom)
+		return;
+
+	// Precompute fixed-point step values (16.16 fixed point)
+	int srcRowStep = (srcH << 16) / dstH;
+	int srcColStep = (srcW << 16) / dstW;
+
+	// Precompute starting source position for clipped region
+	int srcRowAcc = clipTop * srcRowStep;
 
 	unsigned char* buf = static_cast<unsigned char*>(backBuf);
 
-	for (int y = 0; y < dstH; y++)
+	for (int y = clipTop; y < clipBottom; y++)
 	{
-		int srcRow = srcY + y * srcH / dstH;
-		if (srcRow >= bmp->Height)
-			continue;
-
-		int dstRow = dstY + y;
-		if (dstRow >= screen_height)
+		int srcRow = srcY + (srcRowAcc >> 16);
+		if (srcRow >= bmpH)
 			break;
-		if (dstRow < 0)
-			continue;
 
-		const ColorRgba* srcLine = bmp->BmpBufPtr1 + srcRow * bmp->Width + srcX;
-		ColorRgba* dstLine = reinterpret_cast<ColorRgba*>(buf + dstRow * 512 * 4 + dstX * 4);
+		const ColorRgba* srcLine = bmp->BmpBufPtr1 + srcRow * bmpW + srcX;
+		ColorRgba* dstLine = reinterpret_cast<ColorRgba*>(buf + (dstY + y) * 512 * 4 + dstX * 4);
 
-		for (int x = 0; x < dstW; x++)
+		int srcColAcc = clipLeft * srcColStep;
+		for (int x = clipLeft; x < clipRight; x++)
 		{
-			int srcCol = x * srcW / dstW;
-			if (srcCol >= bmp->Width)
+			int srcCol = srcColAcc >> 16;
+			if (srcCol >= bmpW)
 				break;
-			int dstCol = dstX + x;
-			if (dstCol >= screen_width)
-				break;
-			if (dstCol < 0)
-				continue;
 			dstLine[x] = ColorRgba(swapRB(srcLine[srcCol].Color));
+			srcColAcc += srcColStep;
 		}
+
+		srcRowAcc += srcRowStep;
 	}
 }
 
 void psp_ge::endFrame()
 {
 	sceDisplayWaitVblankStart();
-	sceDisplaySetFrameBuf(backBuf, 512, GU_PSM_8888, 1);
+	sceDisplaySetFrameBuf(backBuf, 512, PSP_DISPLAY_PIXEL_FORMAT_8888, 1);
 
 	void* temp = frontBuf;
 	frontBuf = backBuf;
