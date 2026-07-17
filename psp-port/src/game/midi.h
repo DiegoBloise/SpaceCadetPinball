@@ -98,6 +98,8 @@ public:
 	static void music_shutdown();
 	static void music_play();
 	static void music_stop();
+	static void music_pause();
+	static void music_resume();
 	static void SetVolume(int volume);
 	static bool play_track(MidiTracks track, bool replay);
 	static MidiTracks get_active_track();

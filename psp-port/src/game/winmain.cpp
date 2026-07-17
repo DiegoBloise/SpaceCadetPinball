@@ -317,7 +317,7 @@ void winmain::MainLoop()
 			{
 				options::Options.Music = !options::Options.Music;
 				if (!options::Options.Music)
-					midi::music_stop();
+					midi::music_pause();
 				else
 					midi::music_play();
 			}

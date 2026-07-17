@@ -39,6 +39,10 @@ void midi::music_play()
 		play_track(NextTrack, true);
 		NextTrack = MidiTracks::None;
 	}
+	else if (MixOpen && Mix_PausedMusic())
+	{
+		Mix_ResumeMusic();
+	}
 }
 
 void midi::music_stop()
@@ -49,6 +53,18 @@ void midi::music_stop()
 		NextTrack = active_track;
 		StopPlayback();
 	}
+}
+
+void midi::music_pause()
+{
+	if (IsPlaying && MixOpen)
+		Mix_PauseMusic();
+}
+
+void midi::music_resume()
+{
+	if (IsPlaying && MixOpen)
+		Mix_ResumeMusic();
 }
 
 void midi::StopPlayback()
@@ -85,6 +101,9 @@ int midi::music_init(bool mixOpen, int volume)
 		// 3DPB has only one music track. PINBALL2.MID is a bitmap font, in the same format as PB_MSGFT.bin
 		track1 = load_track("PINBALL");
 	}
+
+	if (track1)
+		NextTrack = MidiTracks::Track1;
 
 	return track1 != nullptr;
 }
